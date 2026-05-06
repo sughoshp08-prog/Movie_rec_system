@@ -17,7 +17,7 @@ except:
 
 BASE_DIR = Path(__file__).parent
 CSV_PATH = BASE_DIR / "netflix_titles.csv"
-INDEX_PATH = Path(r"C:\Users\sugho\OneDrive\Desktop\ML practice\Movie recomendation\Index")
+INDEX_PATH = Path(r"Movie recomendation\Index")
 META_PATH = BASE_DIR / "metadata.json"
 EMBED_MODEL = "nomic-embed-text"
 EMBED_ENDPOINT = "http://localhost:11434/api/embeddings"
