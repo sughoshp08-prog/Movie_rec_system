@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Movie Recommendation</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Movie Recommendation Engine</h1>
+    <p>Enter movie details and get the top 10 suggested Netflix titles.</p>
+
+    <form id="recommendation-form">
+      <div class="field-group">
+        <label for="title">Title</label>
+        <input id="title" name="title" placeholder="Example: Stranger Things" />
+      </div>
+
+      <div class="field-group">
+        <label for="type">Type</label>
+        <input id="type" name="type" placeholder="Movie or TV Show" />
+      </div>
+
+      <div class="field-group">
+        <label for="director">Director</label>
+        <input id="director" name="director" placeholder="Director name" />
+      </div>
+
+      <div class="field-group">
+        <label for="cast">Cast</label>
+        <input id="cast" name="cast" placeholder="Main cast names" />
+      </div>
+
+      <div class="field-group">
+        <label for="release_year">Release Year</label>
+        <input id="release_year" name="release_year" placeholder="2024" />
+      </div>
+
+      <div class="field-group">
+        <label for="genres">Genres</label>
+        <input id="genres" name="genres" placeholder="Horror, Thriller, Drama" />
+      </div>
+
+      <div class="field-group full-width">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="5" placeholder="Short description of the movie or show..."></textarea>
+      </div>
+
+      <button type="submit">Find Recommendations</button>
+    </form>
+
+    <div id="results" class="results"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('recommendation-form');
+    const resultsDiv = document.getElementById('results');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      resultsDiv.innerHTML = '<div class="loading">Loading recommendations...</div>';
+
+      const payload = {
+        title: document.getElementById('title').value,
+        type: document.getElementById('type').value,
+        director: document.getElementById('director').value,
+        cast: document.getElementById('cast').value,
+        release_year: document.getElementById('release_year').value,
+        genres: document.getElementById('genres').value,
+        description: document.getElementById('description').value,
+      };
+
+      try {
+        const response = await fetch('/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Recommendation request failed');
+        }
+
+        const data = await response.json();
+        const recommendations = data.recommendations || [];
+
+        if (!recommendations.length) {
+          resultsDiv.innerHTML = '<div class="empty">No recommendations found.</div>';
+          return;
+        }
+
+        resultsDiv.innerHTML = recommendations
+          .map((item, index) => `
+            <div class="recommendation-card">
+              <div class="recommendation-header">
+                <span class="rank">#${index + 1}</span>
+                <h2>${item.title || 'Untitled'}</h2>
+                <span class="type">${item.type || 'Unknown'}</span>
+              </div>
+              <p><strong>Year:</strong> ${item.release_year || 'N/A'}</p>
+              <p><strong>Genres:</strong> ${item.listed_in || 'N/A'}</p>
+              <p><strong>Director:</strong> ${item.director || 'N/A'}</p>
+              <p><strong>Cast:</strong> ${item.cast || 'N/A'}</p>
+              <p class="description">${item.description || 'No description available.'}</p>
+            </div>
+          `)
+          .join('');
+      } catch (error) {
+        resultsDiv.innerHTML = `<div class="error">${error.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html>
